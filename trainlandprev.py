@@ -1,3 +1,4 @@
+
 # imports
 import transformers
 from torch.utils.data import DataLoader, TensorDataset, random_split, RandomSampler, Dataset
@@ -16,25 +17,7 @@ import math
 import random
 import re
 import argparse
-#from transformers import T5Tokenizer, T5ForConditionalGeneration
-#BeIRtokenizer = T5Tokenizer.from_pretrained('BeIR/query-gen-msmarco-t5-large-v1')
-#BeIRmodel = T5ForConditionalGeneration.from_pretrained('BeIR/query-gen-msmarco-t5-large-v1')
-#BeIRmodel.eval()
 
-#import gensim
-#from gensim.models import Word2Vec
-#import nltk
-#from nltk import ngrams
-#import itertools
-#from nltk.corpus import stopwords
-#from nltk.tokenize import sent_tokenize, word_tokenize
-#import scipy
-#from scipy import spatial
-#from nltk.tokenize.toktok import ToktokTokenizer
-#import re
-#tokenizer = ToktokTokenizer()
-#stopword_list = nltk.corpus.stopwords.words('english')
-#w2vmodel = gensim.models.KeyedVectors.load_word2vec_format('/wrk-vakka/users/vuong/music/GoogleNews-vectors-negative300.bin', binary=True)
 
 class LitModel(pl.LightningModule):
   # Instantiate the model
@@ -102,7 +85,7 @@ class LitModel(pl.LightningModule):
     return {'loss': val_loss}
   
   # Method that generates text using the BartForConditionalGeneration's generate() method
-  def generate_text(self, text, eval_beams, early_stopping = False, max_len = 500):
+  def generate_text(self, text, eval_beams, early_stopping = True, max_len = 500):
     ''' Function to generate text '''
     generated_ids = self.model.generate(
         text["input_ids"],
@@ -118,29 +101,25 @@ class LitModel(pl.LightningModule):
     )
     return [self.tokenizer.decode(w, skip_special_tokens=True, clean_up_tokenization_spaces=True) for w in generated_ids]
 
-  def generate_terms(self, text, eval_beams):
-    ''' Function to generate text '''
-    generated_ids = self.model.generate(
-        text["input_ids"],
-        attention_mask=text["attention_mask"],
-        use_cache=True,
-        decoder_start_token_id = self.tokenizer.pad_token_id,
-        num_beams= eval_beams,
-        do_sample=True,
-        num_return_sequences=10
-    )
-    for i, sample_output in enumerate(generated_ids):
-        print("{}: {}".format(i, self.tokenizer.decode(sample_output, skip_special_tokens=True,clean_up_tokenization_spaces=True)))
-    return []
-    #return [self.tokenizer.decode(w, skip_special_tokens=True, clean_up_tokenization_spaces=True) for w in generated_ids]
-
 def freeze_params(model):
   ''' Function that takes a model as input (or part of a model) and freezes the layers for faster training
       adapted from finetune.py '''
   for layer in model.parameters():
     layer.requires_grade = False
 
-
+def find_best_epoch(ckpt_folder):
+    """
+    Find the highest epoch in the Test Tube file structure.
+    :param ckpt_folder: dir where the checpoints are being saved.
+    :return: Integer of the highest epoch reached by the checkpoints.
+    """
+    ckpt_files = os.listdir(ckpt_folder)  # list of strings
+    epochs = [int(filename.split('step=')[-1].split('.')[0]) for filename in ckpt_files]  # 'epoch={int}.ckpt' filename format
+    best_epoch = max(epochs)
+    for filename in ckpt_files:
+        if str('{}.ckpt'.format(best_epoch)) in filename:
+            return filename
+    return best_epoch
 
 # Create a dataloading module as per the PyTorch Lightning Docs
 class SummaryDataModule(pl.LightningDataModule):
@@ -211,7 +190,7 @@ def encode_sentences(tokenizer, source_sentences, target_sentences, max_length=3
 
   for sentence in source_sentences:
     encoded_dict = tokenizer(
-          sentence.lower(),
+          sentence,
           max_length=max_length,
           padding="max_length" if pad_to_max_length else None,
           truncation=True,
@@ -227,7 +206,7 @@ def encode_sentences(tokenizer, source_sentences, target_sentences, max_length=3
 
   for sentence in target_sentences:
     encoded_dict = tokenizer(
-          sentence.lower(),
+          sentence,
           max_length=max_length,
           padding="max_length" if pad_to_max_length else None,
           truncation=True,
@@ -282,27 +261,16 @@ def noise_sentence(sentence_, percent_words, replacement_token = "<mask>"):
   sentence = re.sub(r'<mask> <mask>', "<mask>", sentence)
   return sentence
 
-def find_best_epoch(ckpt_folder):
-    """
-    Find the highest epoch in the Test Tube file structure.
-    :param ckpt_folder: dir where the checpoints are being saved.
-    :return: Integer of the highest epoch reached by the checkpoints.
-    """
-    ckpt_files = os.listdir(ckpt_folder)  # list of strings
-    epochs = [int(filename.split('step=')[-1].split('.')[0]) for filename in ckpt_files]  # 'epoch={int}.ckpt' filename format
-    best_epoch = max(epochs)
-    for filename in ckpt_files:
-        if str('{}.ckpt'.format(best_epoch)) in filename:
-            return filename
-    return best_epoch
 
 # Load the model
 from transformers import BartTokenizer, BartForConditionalGeneration, AdamW, BartConfig
 
-tokenizer = BartTokenizer.from_pretrained('facebook/bart-base', add_prefix_space=False, bos_token="<s>", eos_token="</s>")
+tokenizer = BartTokenizer.from_pretrained('facebook/bart-base', add_prefix_space=False)
 
 bart_model = BartForConditionalGeneration.from_pretrained(
     "facebook/bart-base")
+
+
 
 def generate_lyrics(seed_line, num_lines, model_, noise_percent = 0.25, multiple_lines = False, max_line_history = 3):
   ''' Function that generates lyrics based on previously generated lyrics 
@@ -318,83 +286,48 @@ def generate_lyrics(seed_line, num_lines, model_, noise_percent = 0.25, multiple
   model_.eval()
   lyrics = []
   lyrics.append(seed_line)
-  seed_line = seed_line
-  prompt_line_tokens = tokenizer(seed_line.lower(), max_length = 300, return_tensors = "pt", truncation = True)
-#  print(prompt_line_tokens)
+  prompt_line_tokens = tokenizer(seed_line, max_length = 300, return_tensors = "pt", truncation = True)
   line = model_.generate_text(prompt_line_tokens, eval_beams = 4)
   print('pred',list(set(line)))
+
   return list(set(line))
 
-def generate_termlyrics(seed_line, num_lines, model_, noise_percent = 0.25, multiple_lines = False, max_line_history = 3):
-  model_.to(torch.device('cpu'))
-  model_.eval()
-  lyrics = []
-  lyrics.append(seed_line)
-  seed_line = seed_line
-  prompt_line_tokens = tokenizer(seed_line.lower(), max_length = 300, return_tensors = "pt", truncation = True)
-  print(prompt_line_tokens)
-  line = model_.generate_terms(prompt_line_tokens, eval_beams = 4)
-  print('pred',line)
-  return seed_line
-
-def data_clean(text):
-    pattern = r'[^a-zA-Z0-9\s]'
-    text = re.sub(pattern,'',' '.join(text))
-    tokens = [token.strip() for token in text.split()]
-    filtered = [token for token in tokens if token.lower() not in stopword_list]
-    filtered = ' '.join(filtered)
-    return filtered
-def embeddings(word):
-#    print(word)
-    if word in w2vmodel.key_to_index:
-        return w2vmodel.get_vector(word)
-    else:
-        return np.zeros(300)
-
-def get_sim(query_embedding, average_vec):
-    sim = [(1 - scipy.spatial.distance.cosine(query_embedding, average_vec))]
-    return sim
-
-def rankings(query,out_dict):
-    query_words = (np.mean(np.array([embeddings(x) for x in nltk.word_tokenize(query.lower())], dtype=float), axis=0))
-    rank = []
-    for k, v in out_dict.items():
-        try:
-            rank.append((k, get_sim(query_words, v)))
-        except:
-            pass
-    rank = sorted(rank, key=lambda t: t[1], reverse=True)
-    print("Ranked documents: ")
-    return rank
 
 def main():
     torch.cuda.empty_cache()
-#    with open('./mytestdata/suggest3screen_incomplete.json', 'r') as f:
+#    with open('./mytestdata/suggestland_prevpage.json', 'r') as f:
 #        userindex = json.load(f)
 #    suggestions = userindex
 #    print(userindex.keys())
     suggestions = {}
     with open('./mytestdata/landindex.json') as json_file:
         queryindex = json.load(json_file)
-    for filename in os.listdir("./mytestdata/land_3screens"):
+    for filename in os.listdir("./mytestdata/land_prevpage"):
         if filename.endswith(".csv"):
             user = filename.replace('.csv','')
 #            if user in userindex.keys():
 #                continue
             suggestions[user] = []
-            ratio = 0.7
+            ratio = .7
             if user in ['D43D7EC3E0C2']:
-                ratio = 0.85
+                ratio = .85
+#            if user != '14ABC56D0B51':
+#                continue
             print('--------------',user,ratio,'----------')
             allindex = queryindex[filename.replace('.csv','')]
             splitindex = allindex[int(len(allindex)*ratio)]
+            df = pd.read_csv('./mytestdata/land_prevpage/'+filename)
+            for index, row in df.iterrows():
+                if (row['index'] >= splitindex):
+                    splitindex = index
+                    break
             pred_index = allindex[int(len(allindex)*ratio):]
             #print(allindex)
             #print(splitindex)
             #print(pred_index)
             #break
             # Load the data into the model for training
-            summary_data = SummaryDataModule(tokenizer, './mytestdata/land_3screens/'+filename,
+            summary_data = SummaryDataModule(tokenizer, './mytestdata/land_prevpage/'+filename,
                                              batch_size = 14, num_examples = splitindex)
 
             # Load the model from a pre-saved checkpoint; alternatively use the code below to start training from scratch
@@ -403,54 +336,50 @@ def main():
 
             model = LitModel(learning_rate = 2e-5, tokenizer = tokenizer, model = bart_model, hparams = hparams)
 
-            ckpt_dir = './checkpoint_files_2/'+user+'_land_3screens'
+
+            ckpt_dir = './checkpoint_files_2/'+user+'_land_prevpage'
             checkpoint = ModelCheckpoint(ckpt_dir)
             if exists(ckpt_dir):
                 best_epoch = find_best_epoch(ckpt_dir)
                 print(ckpt_dir+'/'+best_epoch)
-                trainer = pl.Trainer(gpus = [2,3],
+                trainer = pl.Trainer(gpus = 4,
                                  max_epochs = 20,
                                  min_epochs = 20,
                                  auto_lr_find = False,
                                  resume_from_checkpoint = ckpt_dir+'/'+best_epoch,
                                  progress_bar_refresh_rate = 10)
             else:
-                trainer = pl.Trainer(gpus = [2,3],
+                trainer = pl.Trainer(gpus = 4,
                                  max_epochs = 20,
                                  min_epochs = 20,
                                  auto_lr_find = False,
                                  checkpoint_callback = checkpoint,
                                  progress_bar_refresh_rate = 10)
 
+
             # Fit the instantiated model to the data
             trainer.fit(model, summary_data)
 #            continue
-            pred_df = pd.read_csv('./mytestdata/land_3screens/'+filename)[splitindex:]
+            pred_df = pd.read_csv('./mytestdata/land_prevpage/'+filename)[splitindex:]
+            print(pred_index)
             for index, row in pred_df.iterrows():
-                if (index+3 not in pred_index):
+                print(row['index'])
+                if (row['index'] not in pred_index):
                     continue
                 print()
-                print(index+3)
+                print(row['index'])
                 print('target',row['target'][:250])
+                print('query',row['title'])
                 print('source',row['source'][:250])
-                print('query: ',row['query'])
-                print('land: ',row['title'])
                 pred_target = generate_lyrics(seed_line = row['source'], num_lines = 2, model_ = model,
                                        noise_percent = 0.25, multiple_lines = True, max_line_history = 2)
-#                allgrams = []
-#                out_dict = {}
-#                for sentence in pred_target.split('.'):
-#                    allgrams += ngrams(sentence.split(), 3)
-#                for grams in allgrams:
-#                    sen = ' '.join(grams)
-#                    average_vector = (np.mean(np.array([embeddings(x) for x in data_clean(nltk.word_tokenize(sen)).split()]), axis=0))
-#                    d1 = {sen: (average_vector)}
-#                    out_dict.update(d1)
-#                print(rankings(row['source'],out_dict))
-                suggestions[user].append([row['title'],row['target'],pred_target,row['source'],index+3,row['query']])
-        with open('./mytestdata/suggestland_3screens.json', 'w') as outfile:
+                suggestions[user].append([row['title'],row['target'],pred_target,row['source'],row['index']])
+        with open('./mytestdata/suggestland_prevpage.json', 'w') as outfile:
             json.dump(suggestions, outfile)
+
 
 if __name__ == '__main__':
     # freeze_support() here if program needs to be frozen
     main()  # execute this only when run directly, not when imported!    
+
+

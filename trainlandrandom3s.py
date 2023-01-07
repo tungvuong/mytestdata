@@ -20,18 +20,17 @@ import argparse
 #BeIRtokenizer = T5Tokenizer.from_pretrained('BeIR/query-gen-msmarco-t5-large-v1')
 #BeIRmodel = T5ForConditionalGeneration.from_pretrained('BeIR/query-gen-msmarco-t5-large-v1')
 #BeIRmodel.eval()
-
-#import gensim
-#from gensim.models import Word2Vec
-#import nltk
-#from nltk import ngrams
-#import itertools
-#from nltk.corpus import stopwords
-#from nltk.tokenize import sent_tokenize, word_tokenize
-#import scipy
-#from scipy import spatial
-#from nltk.tokenize.toktok import ToktokTokenizer
-#import re
+import gensim
+from gensim.models import Word2Vec
+import nltk
+from nltk import ngrams
+import itertools
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
+import scipy
+from scipy import spatial
+from nltk.tokenize.toktok import ToktokTokenizer
+import re
 #tokenizer = ToktokTokenizer()
 #stopword_list = nltk.corpus.stopwords.words('english')
 #w2vmodel = gensim.models.KeyedVectors.load_word2vec_format('/wrk-vakka/users/vuong/music/GoogleNews-vectors-negative300.bin', binary=True)
@@ -118,7 +117,7 @@ class LitModel(pl.LightningModule):
     )
     return [self.tokenizer.decode(w, skip_special_tokens=True, clean_up_tokenization_spaces=True) for w in generated_ids]
 
-  def generate_terms(self, text, eval_beams):
+  def generate_terms(self, text, eval_beams, do_sample=True, top_k=5,top_p=0.95,num_return_sequences=20):
     ''' Function to generate text '''
     generated_ids = self.model.generate(
         text["input_ids"],
@@ -126,8 +125,11 @@ class LitModel(pl.LightningModule):
         use_cache=True,
         decoder_start_token_id = self.tokenizer.pad_token_id,
         num_beams= eval_beams,
-        do_sample=True,
-        num_return_sequences=10
+        do_sample=do_sample,
+        temperature=0.5, 
+        top_k=top_k,
+        top_p = top_p,
+        num_return_sequences=num_return_sequences
     )
     for i, sample_output in enumerate(generated_ids):
         print("{}: {}".format(i, self.tokenizer.decode(sample_output, skip_special_tokens=True,clean_up_tokenization_spaces=True)))
@@ -322,8 +324,22 @@ def generate_lyrics(seed_line, num_lines, model_, noise_percent = 0.25, multiple
   prompt_line_tokens = tokenizer(seed_line.lower(), max_length = 300, return_tensors = "pt", truncation = True)
 #  print(prompt_line_tokens)
   line = model_.generate_text(prompt_line_tokens, eval_beams = 4)
-  print('pred',list(set(line)))
-  return list(set(line))
+  print('pred',line)
+#  v = line[0].strip()
+#  input_ids = BeIRtokenizer.encode(v, return_tensors='pt')
+#  with torch.no_grad():
+#      outputs = BeIRmodel.generate(
+#          input_ids=input_ids,
+#          max_length=64,
+#          do_sample=True,
+#          top_p=0.95,
+#          num_return_sequences=20)
+#  _myqueries = []
+#  for i in range(len(outputs)):
+#      query = BeIRtokenizer.decode(outputs[i], skip_special_tokens=True)
+#      _myqueries.append(query)
+#  print(_myqueries)
+  return line
 
 def generate_termlyrics(seed_line, num_lines, model_, noise_percent = 0.25, multiple_lines = False, max_line_history = 3):
   model_.to(torch.device('cpu'))
@@ -369,18 +385,18 @@ def rankings(query,out_dict):
 
 def main():
     torch.cuda.empty_cache()
-#    with open('./mytestdata/suggest3screen_incomplete.json', 'r') as f:
-#        userindex = json.load(f)
-#    suggestions = userindex
-#    print(userindex.keys())
-    suggestions = {}
+    with open('./mytestdata/suggestland_random3s.json', 'r') as f:
+        userindex = json.load(f)
+    suggestions = userindex
+    print(userindex.keys())
+#    suggestions = {}
     with open('./mytestdata/landindex.json') as json_file:
         queryindex = json.load(json_file)
-    for filename in os.listdir("./mytestdata/land_3screens"):
+    for filename in os.listdir("./mytestdata/land_random3s"):
         if filename.endswith(".csv"):
             user = filename.replace('.csv','')
-#            if user in userindex.keys():
-#                continue
+            if user in userindex.keys():
+                continue
             suggestions[user] = []
             ratio = 0.7
             if user in ['D43D7EC3E0C2']:
@@ -394,7 +410,7 @@ def main():
             #print(pred_index)
             #break
             # Load the data into the model for training
-            summary_data = SummaryDataModule(tokenizer, './mytestdata/land_3screens/'+filename,
+            summary_data = SummaryDataModule(tokenizer, './mytestdata/land_random3s/'+filename,
                                              batch_size = 14, num_examples = splitindex)
 
             # Load the model from a pre-saved checkpoint; alternatively use the code below to start training from scratch
@@ -403,19 +419,19 @@ def main():
 
             model = LitModel(learning_rate = 2e-5, tokenizer = tokenizer, model = bart_model, hparams = hparams)
 
-            ckpt_dir = './checkpoint_files_2/'+user+'_land_3screens'
+            ckpt_dir = './checkpoint_files_2/'+user+'_land_random3s'
             checkpoint = ModelCheckpoint(ckpt_dir)
             if exists(ckpt_dir):
                 best_epoch = find_best_epoch(ckpt_dir)
                 print(ckpt_dir+'/'+best_epoch)
-                trainer = pl.Trainer(gpus = [2,3],
+                trainer = pl.Trainer(gpus = [1,2,3],
                                  max_epochs = 20,
                                  min_epochs = 20,
                                  auto_lr_find = False,
                                  resume_from_checkpoint = ckpt_dir+'/'+best_epoch,
                                  progress_bar_refresh_rate = 10)
             else:
-                trainer = pl.Trainer(gpus = [2,3],
+                trainer = pl.Trainer(gpus = [1,2,3],
                                  max_epochs = 20,
                                  min_epochs = 20,
                                  auto_lr_find = False,
@@ -425,7 +441,7 @@ def main():
             # Fit the instantiated model to the data
             trainer.fit(model, summary_data)
 #            continue
-            pred_df = pd.read_csv('./mytestdata/land_3screens/'+filename)[splitindex:]
+            pred_df = pd.read_csv('./mytestdata/land_random3s/'+filename)[splitindex:]
             for index, row in pred_df.iterrows():
                 if (index+3 not in pred_index):
                     continue
@@ -433,8 +449,8 @@ def main():
                 print(index+3)
                 print('target',row['target'][:250])
                 print('source',row['source'][:250])
+                print('full: ',row['title'])
                 print('query: ',row['query'])
-                print('land: ',row['title'])
                 pred_target = generate_lyrics(seed_line = row['source'], num_lines = 2, model_ = model,
                                        noise_percent = 0.25, multiple_lines = True, max_line_history = 2)
 #                allgrams = []
@@ -447,8 +463,8 @@ def main():
 #                    d1 = {sen: (average_vector)}
 #                    out_dict.update(d1)
 #                print(rankings(row['source'],out_dict))
-                suggestions[user].append([row['title'],row['target'],pred_target,row['source'],index+3,row['query']])
-        with open('./mytestdata/suggestland_3screens.json', 'w') as outfile:
+                suggestions[user].append([row['title'],row['target'],pred_target,row['source'],index+3])
+        with open('./mytestdata/suggestland_random3s.json', 'w') as outfile:
             json.dump(suggestions, outfile)
 
 if __name__ == '__main__':
