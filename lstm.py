@@ -237,10 +237,11 @@ def main():
             # Number of test characters of text to generate after training the network
             LEN_TEST_TEXT = 500
 
+            
             # Initialize the network
-            config = tf.ConfigProto()
+            config = tf.compat.v1.ConfigProto()
             config.gpu_options.allow_growth = True
-            sess = tf.InteractiveSession(config=config)
+            sess = tf.compat.v1.InteractiveSession(config=config)
             net = ModelNetwork(
                 in_size=in_size,
                 lstm_size=lstm_size,
@@ -250,8 +251,9 @@ def main():
                 learning_rate=0.003,
                 name="char_rnn_network"
             )
-            sess.run(tf.global_variables_initializer())
-            saver = tf.train.Saver(tf.global_variables())
+            sess.run(tf.compat.v1.global_variables_initializer())
+            saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
+            
             
             # 1) TRAIN THE NETWORK
             check_restore_parameters(sess, saver)
