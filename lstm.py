@@ -214,7 +214,6 @@ def main():
             #train, validate, test = np.split(data.sample(frac=1), [int(.6*len(data)), int(.8*len(data))])
             train, test = np.split(data.sample(frac=1), [int(ratio*len(data))])
             print(len(train))
-            print(len(validate))
             print(len(test))
             rows = []
             for row in train['target']:
