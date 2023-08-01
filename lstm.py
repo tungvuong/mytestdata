@@ -217,7 +217,7 @@ def main():
             print(len(test))
             rows = []
             for row in train['target']:
-                print(row)
+                rows.append(row)
             with open('./mytestdata/lstm_data/'+user+'.txt', 'w') as f:
                 for line in rows:
                     f.write(f"{line[:500]}\n")
