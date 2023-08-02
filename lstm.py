@@ -225,7 +225,7 @@ def main():
                 for line in rows:
                     f.write(f"{line[:500]}\n")
             # mkdir model train dir
-            Path("./mytestdata/lstm_data/saved/user").mkdir(parents=True, exist_ok=True)
+            #Path("./mytestdata/lstm_data/saved/user").mkdir(parents=True, exist_ok=True)
             # Load the data
             data, vocab = load_data('./mytestdata/lstm_data/'+user+'.txt')
             

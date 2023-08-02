@@ -218,14 +218,14 @@ def main():
             train, test = np.split(data.sample(frac=1), [int(ratio*len(data))])
             print(len(train))
             print(len(test))
-            rows = []
-            for row in train['source']:
-                rows.append(row.split('</s>')[0])
-            with open('./mytestdata/lstm_data/'+user+'.txt', 'w') as f:
-                for line in rows:
-                    f.write(f"{line[:500]}\n")
+            #rows = []
+            #for row in train['source']:
+            #    rows.append(row.split('</s>')[0])
+            #with open('./mytestdata/lstm_data/'+user+'.txt', 'w') as f:
+            #    for line in rows:
+            #        f.write(f"{line[:500]}\n")
             # mkdir model train dir
-            Path("./mytestdata/lstm_data/saved/user").mkdir(parents=True, exist_ok=True)
+            #Path("./mytestdata/lstm_data/saved/user").mkdir(parents=True, exist_ok=True)
             # Load the data
             data, vocab = load_data('./mytestdata/lstm_data/'+user+'.txt')
             
@@ -235,7 +235,7 @@ def main():
             batch_size = 64  # 128
             time_steps = 100  # 50
 
-            NUM_TRAIN_BATCHES = 20000
+            NUM_TRAIN_BATCHES = 5000
             
             # Number of test characters of text to generate after training the network
             LEN_TEST_TEXT = 500
