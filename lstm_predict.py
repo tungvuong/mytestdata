@@ -257,7 +257,7 @@ def main():
             sess.run(tf.compat.v1.global_variables_initializer())
             saver = tf.compat.v1.train.Saver(tf.compat.v1.global_variables())
             
-            
+            print('LOADING!')
             # 2) GENERATE LEN_TEST_TEXT CHARACTERS USING THE TRAINED NETWORK
             saver.restore(sess, './mytestdata/lstm_data/saved/'+user+'/model.ckpt')
             
