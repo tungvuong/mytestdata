@@ -235,7 +235,7 @@ def main():
             batch_size = 64  # 128
             time_steps = 100  # 50
 
-            NUM_TRAIN_BATCHES = 20000
+            NUM_TRAIN_BATCHES = 5000
             
             # Number of test characters of text to generate after training the network
             LEN_TEST_TEXT = 500
