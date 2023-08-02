@@ -1,3 +1,4 @@
+from pathlib import Path
 import pandas as pd
 import numpy as np
 import json
@@ -218,14 +219,16 @@ def main():
             print(len(train))
             print(len(test))
             rows = []
-            for row in train['target']:
-                rows.append(row)
+            for row in train['source']:
+                rows.append(row.split('</s>')[0])
             with open('./mytestdata/lstm_data/'+user+'.txt', 'w') as f:
                 for line in rows:
                     f.write(f"{line[:500]}\n")
+            # mkdir model train dir
+            Path("./mytestdata/lstm_data/saved/user").mkdir(parents=True, exist_ok=True)
             # Load the data
             data, vocab = load_data('./mytestdata/lstm_data/'+user+'.txt')
-
+            
             in_size = out_size = len(vocab)
             lstm_size = 256  # 128
             num_layers = 2
@@ -282,7 +285,7 @@ def main():
                     print("batch: {}  loss: {}  speed: {} batches / s".format(
                         i, cst, 100 / diff
                     ))
-                    saver.save(sess, './mytestdata/lstm_data/saved/model_'+user+'.ckpt')
+                    saver.save(sess, './mytestdata/lstm_data/saved/'+user+'/model.ckpt')
             
             break
 
