@@ -259,7 +259,7 @@ def main():
             
             print('LOADING!')
             # 2) GENERATE LEN_TEST_TEXT CHARACTERS USING THE TRAINED NETWORK
-            saver.restore(sess, './mytestdata/lstm_data/saved/'+user+'/model.ckpt')
+            saver.restore(sess, './mytestdata/lstm_data/saved/'+user)
             
             TEST_PREFIX = ''
             TARGET = ''
