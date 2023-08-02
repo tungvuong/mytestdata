@@ -263,6 +263,7 @@ def main():
             
             TEST_PREFIX = ''
             TARGET = ''
+            print(TARGET)
             for row in test['source']:
                 TEST_PREFIX = row.split('</s>')[0]
                 break
@@ -271,7 +272,7 @@ def main():
                 break
             for i in range(len(TEST_PREFIX)):
                 out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
-
+    
             print("Sentence:")
             gen_str = TEST_PREFIX
             for i in range(LEN_TEST_TEXT):
@@ -281,7 +282,6 @@ def main():
                 gen_str += vocab[element]
                 out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
             
-            print(TARGET)
             print(gen_str)
             
             break
