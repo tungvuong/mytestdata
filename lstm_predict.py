@@ -235,7 +235,7 @@ def main():
             batch_size = 64  # 128
             time_steps = 100  # 50
 
-            NUM_TRAIN_BATCHES = 1000
+            NUM_TRAIN_BATCHES = 20000
             
             # Number of test characters of text to generate after training the network
             LEN_TEST_TEXT = 500
@@ -281,7 +281,7 @@ def main():
                 element = np.random.choice(range(len(vocab)), p=out)
                 gen_str += vocab[element]
                 out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
-            
+            print('GEN:')
             print(gen_str)
             
             break
