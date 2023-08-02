@@ -260,8 +260,15 @@ def main():
             
             # 2) GENERATE LEN_TEST_TEXT CHARACTERS USING THE TRAINED NETWORK
             saver.restore(sess, './mytestdata/lstm_data/saved/'+user+'/model.ckpt')
-
-            TEST_PREFIX = test['source'][0].split('</s>')[0]
+            
+            TEST_PREFIX = ''
+            TARGET = ''
+            for row in test['source']:
+                TEST_PREFIX = row.split('</s>')[0]
+                break
+            for row in test['target']:
+                TARGET = row
+                break
             for i in range(len(TEST_PREFIX)):
                 out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
 
@@ -274,7 +281,7 @@ def main():
                 gen_str += vocab[element]
                 out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
             
-            print(test['target'][0])
+            print(TARGET)
             print(gen_str)
             
             break
