@@ -263,7 +263,6 @@ def main():
             
             TEST_PREFIX = ''
             TARGET = ''
-            print(TARGET)
             for row in test['source']:
                 TEST_PREFIX = row.split('</s>')[0]
                 break
@@ -273,6 +272,7 @@ def main():
             for i in range(len(TEST_PREFIX)):
                 out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
     
+            print(TARGET)
             print("Sentence:")
             gen_str = TEST_PREFIX
             for i in range(LEN_TEST_TEXT):
