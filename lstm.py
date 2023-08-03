@@ -289,7 +289,7 @@ def main():
                     ))
                     saver.save(sess, './mytestdata/lstm_data/saved/'+user+'/model.ckpt')
             
-            break
+            #break
 
 if __name__ == '__main__':
     main()  # execute this only when run directly, not when imported!   
