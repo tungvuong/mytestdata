@@ -218,6 +218,8 @@ def main():
             train, test = np.split(data.sample(frac=1), [int(ratio*len(data))])
             print(len(train))
             print(len(test))
+            if os.path.exists('./mytestdata/lstm_data/saved/'+user):
+                continue
             rows = []
             for row in train['source']:
                 rows.append(row.split('</s>')[0])
