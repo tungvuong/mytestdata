@@ -288,7 +288,7 @@ def main():
                         i, cst, 100 / diff
                     ))
                     saver.save(sess, './mytestdata/lstm_data/saved/'+user+'/model.ckpt')
-            
+            sess.close()
             #break
 
 if __name__ == '__main__':
