@@ -272,8 +272,10 @@ def main():
             for i in range(len(TEST_PREFIX)):
                 out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
     
+            print("TARGET:")
             print(TARGET)
-            print("Sentence:")
+            print("SOURCE:")
+            print(TEST_PREFIX)
             gen_str = TEST_PREFIX
             for i in range(LEN_TEST_TEXT):
                 # Sample character from the network according to the generated
