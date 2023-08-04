@@ -285,8 +285,8 @@ def main():
                     out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
                 suggestions[user].append([row['title'],row['target'],pred_target,row['source'],index+2])
                 print(pred_target)
-#            with open('./mytestdata/lstm3screen.json', 'w') as outfile:
-#                json.dump(suggestions, outfile)
+            with open('./mytestdata/lstm3screen.json', 'w') as outfile:
+                json.dump(suggestions, outfile)
             
 #            TEST_PREFIX = ''
 #            TARGET = ''
