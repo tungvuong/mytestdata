@@ -201,6 +201,7 @@ def main():
         queryindex = json.load(json_file)
     for filename in os.listdir("./mytestdata/3screens"):
         if filename.endswith(".csv"):
+            tf.reset_default_graph()
             user = filename.replace('.csv','')
             print(user)
             suggestions[user] = []
