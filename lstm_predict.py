@@ -201,6 +201,7 @@ def main():
         queryindex = json.load(json_file)
     for filename in os.listdir("./mytestdata/3screens"):
         if filename.endswith(".csv"):
+            tf.compat.v1.reset_default_graph()
             user = filename.replace('.csv','')
             print(user)
             suggestions[user] = []
@@ -312,6 +313,7 @@ def main():
 #            print('GEN:')
 #            print(gen_str)
             
+            sess.close()
             #break
 
 if __name__ == '__main__':
