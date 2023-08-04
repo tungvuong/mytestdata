@@ -270,9 +270,12 @@ def main():
                 print('target',row['target'][:500])
                 print('source',row['source'][:500])
                 print('query: ',row['title'])
-                TEST_PREFIX = row['source'].split('</s>')[0]
+                TEST_PREFIX = row['source'].split('</s>')[0][:500]
                 for i in range(len(TEST_PREFIX)):
-                    out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
+                    try:
+                        out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
+                    except:
+                        print('exception!')
                 pred_target = ''
                 for i in range(LEN_TEST_TEXT):
                     element = np.random.choice(range(len(vocab)), p=out)
