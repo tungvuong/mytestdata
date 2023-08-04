@@ -261,30 +261,52 @@ def main():
             # 2) GENERATE LEN_TEST_TEXT CHARACTERS USING THE TRAINED NETWORK
             saver.restore(sess, './mytestdata/lstm_data/saved/'+user+'/model.ckpt')
             
-            TEST_PREFIX = ''
-            TARGET = ''
-            for row in test['source']:
-                TEST_PREFIX = row.split('</s>')[0]
-                break
-            for row in test['target']:
-                TARGET = row
-                break
-            for i in range(len(TEST_PREFIX)):
-                out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
-    
-            print("TARGET:")
-            print(TARGET)
-            print("SOURCE:")
-            print(TEST_PREFIX)
-            gen_str = TEST_PREFIX
-            for i in range(LEN_TEST_TEXT):
-                # Sample character from the network according to the generated
-                # output probabilities.
-                element = np.random.choice(range(len(vocab)), p=out)
-                gen_str += vocab[element]
-                out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
-            print('GEN:')
-            print(gen_str)
+            pred_df = pd.read_csv('./mytestdata/3screens/'+filename)[splitindex:]
+            for index, row in pred_df.iterrows():
+                if (index+2 not in pred_index):
+                    continue
+                print()
+                print(index+2)
+                print('target',row['target'][:500])
+                print('source',row['source'][:500])
+                print('query: ',row['title'])
+                TEST_PREFIX = row['source'].split('</s>')[0]
+                for i in range(len(TEST_PREFIX)):
+                    out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
+                pred_target = ''
+                for i in range(LEN_TEST_TEXT):
+                    element = np.random.choice(range(len(vocab)), p=out)
+                    gen_str += vocab[element]
+                    out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
+                suggestions[user].append([row['title'],row['target'],pred_target,row['source'],index+2])
+                print(pred_target)
+#            with open('./mytestdata/lstm3screen.json', 'w') as outfile:
+#                json.dump(suggestions, outfile)
+            
+#            TEST_PREFIX = ''
+#            TARGET = ''
+#            for row in test['source']:
+#                TEST_PREFIX = row.split('</s>')[0]
+#                break
+#            for row in test['target']:
+#                TARGET = row
+#                break
+#            for i in range(len(TEST_PREFIX)):
+#                out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
+#    
+#            print("TARGET:")
+#            print(TARGET)
+#            print("SOURCE:")
+#            print(TEST_PREFIX)
+#            gen_str = TEST_PREFIX
+#            for i in range(LEN_TEST_TEXT):
+#                # Sample character from the network according to the generated
+#                # output probabilities.
+#                element = np.random.choice(range(len(vocab)), p=out)
+#                gen_str += vocab[element]
+#                out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
+#            print('GEN:')
+#            print(gen_str)
             
             break
 
