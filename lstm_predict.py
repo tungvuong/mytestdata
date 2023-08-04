@@ -263,10 +263,10 @@ def main():
             
             pred_df = pd.read_csv('./mytestdata/3screens/'+filename)[splitindex:]
             for index, row in pred_df.iterrows():
-                if (index+2 not in pred_index):
+                if (index+1 not in pred_index):
                     continue
                 print()
-                print(index+2)
+                print(index+1)
                 print('target',row['target'][:500])
                 print('source',row['source'][:500])
                 print('query: ',row['title'])
