@@ -263,11 +263,11 @@ def main():
             
             pred_df = pd.read_csv('./mytestdata/3screens/'+filename)[splitindex:]
             for index, row in pred_df.iterrows():
-                print('++++',row['title'],index)
-                if (index+3 not in pred_index):
+                #print('++++',row['title'],index)
+                if (index+2 not in pred_index):
                     continue
                 print()
-                print(index+3)
+                print(index+2)
                 print('target',row['target'][:500])
                 print('source',row['source'][:500])
                 print('query: ',row['title'])
@@ -312,7 +312,7 @@ def main():
 #            print('GEN:')
 #            print(gen_str)
             
-            break
+            #break
 
 if __name__ == '__main__':
     main()  # execute this only when run directly, not when imported!   
