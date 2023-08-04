@@ -276,7 +276,7 @@ def main():
                 pred_target = ''
                 for i in range(LEN_TEST_TEXT):
                     element = np.random.choice(range(len(vocab)), p=out)
-                    gen_str += vocab[element]
+                    pred_target += vocab[element]
                     out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
                 suggestions[user].append([row['title'],row['target'],pred_target,row['source'],index+2])
                 print(pred_target)
