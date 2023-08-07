@@ -221,9 +221,7 @@ def main():
             print(len(train))
             print(len(test))
             allindex = queryindex[filename.replace('.csv','')]
-            splitindex = allindex[int(len(allindex)*ratio)]
-            pred_index = allindex[len(train):]
-            print(splitindex)
+            pred_index = [__ind for __ind in allindex if __ind>len(train)]
             print(pred_index)
             #rows = []
             #for row in train['source']:
