@@ -290,7 +290,7 @@ def main():
                         element = np.random.choice(range(len(vocab)), p=out)
                         pred_target += vocab[element]
                         out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
-                    print(pred_target)
+                    #print(pred_target)
                     pred_targets.append(pred_target)
                 suggestions[user].append([row['title'],row['target'],pred_targets,row['source'],index+2])
             with open('./mytestdata/lstm3screen.json', 'w') as outfile:
