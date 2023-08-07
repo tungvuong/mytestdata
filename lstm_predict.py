@@ -200,10 +200,10 @@ def main():
     queryindex = {}
     with open('./mytestdata/processed_suggest3screen.json', 'r') as f:
         suggest3screens = json.load(f)
-    for user,suggestions in suggest3screens.items():
+    for user,__suggestions in suggest3screens.items():
         if user not in queryindex:
             queryindex[user]=[]
-        for __sug in suggestions:
+        for __sug in __suggestions:
             queryindex[user].append(__sug[4])
     for filename in os.listdir("./mytestdata/3screens"):
         if filename.endswith(".csv"):
