@@ -266,7 +266,7 @@ def main():
             # 2) GENERATE LEN_TEST_TEXT CHARACTERS USING THE TRAINED NETWORK
             saver.restore(sess, './mytestdata/lstm_data/saved/'+user+'/model.ckpt')
             
-            pred_df = pd.read_csv('./mytestdata/3screens/'+filename)[splitindex:]
+            pred_df = pd.read_csv('./mytestdata/3screens/'+filename)[len(train):]
             for index, row in pred_df.iterrows():
                 #print('++++',row['title'],index)
                 if (index+2 not in pred_index):
