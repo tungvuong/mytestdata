@@ -282,12 +282,16 @@ def main():
                         out = net.run_step(embed_to_vocab(TEST_PREFIX[i], vocab), i == 0)
                     except:
                         print('exception!')
-                pred_target = ''
-                for i in range(LEN_TEST_TEXT):
-                    element = np.random.choice(range(len(vocab)), p=out)
-                    pred_target += vocab[element]
-                    out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
-                suggestions[user].append([row['title'],row['target'],[pred_target],row['source'],index+2])
+                pred_targets = []
+                tf.compat.v1.set_random_seed(random.random())
+                for v in range(10):
+                    pred_target = ''
+                    for i in range(LEN_TEST_TEXT):
+                        element = np.random.choice(range(len(vocab)), p=out)
+                        pred_target += vocab[element]
+                        out = net.run_step(embed_to_vocab(vocab[element], vocab), False)
+                    pred_targets.append(pred_target)
+                suggestions[user].append([row['title'],row['target'],pred_targets,row['source'],index+2])
                 print(pred_target)
             with open('./mytestdata/lstm3screen.json', 'w') as outfile:
                 json.dump(suggestions, outfile)
