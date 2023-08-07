@@ -199,7 +199,7 @@ def main():
     suggestions = {}
     queryindex = {}
     with open('./mytestdata/processed_suggest3screen.json', 'r') as f:
-        _suggest = json.load(f)
+        suggest3screens = json.load(f)
     for user,suggestions in suggest3screens.items():
         if user not in queryindex:
             queryindex[user]=[]
