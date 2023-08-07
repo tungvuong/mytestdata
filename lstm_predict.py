@@ -215,16 +215,16 @@ def main():
             if user in ['D43D7EC3E0C2']:
                 ratio = 0.85
             print('--------------',user,ratio,'----------')
-            allindex = queryindex[filename.replace('.csv','')]
-            splitindex = allindex[int(len(allindex)*ratio)]
-            pred_index = queryindex
-            print(splitindex)
-            print(pred_index)
             data = pd.read_csv('./mytestdata/3screens/'+filename)
             #train, validate, test = np.split(data.sample(frac=1), [int(.6*len(data)), int(.8*len(data))])
             train, test = np.split(data.sample(frac=1), [int(ratio*len(data))])
             print(len(train))
             print(len(test))
+            allindex = queryindex[filename.replace('.csv','')]
+            splitindex = allindex[int(len(allindex)*ratio)]
+            pred_index = allindex[len(train):]
+            print(splitindex)
+            print(pred_index)
             #rows = []
             #for row in train['source']:
             #    rows.append(row.split('</s>')[0])
