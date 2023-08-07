@@ -197,8 +197,14 @@ def check_restore_parameters(sess, saver):
 
 def main():
     suggestions = {}
-    with open('./mytestdata/queryindex.json') as json_file:
-        queryindex = json.load(json_file)
+    queryindex = {}
+    with open('./mytestdata/processed_suggest3screen.json', 'r') as f:
+        _suggest = json.load(f)
+    for user,suggestions in suggest3screens.items():
+        if user not in queryindex:
+            queryindex[user]=[]
+        for __sug in suggestions:
+            queryindex[user].append(__sug[4])
     for filename in os.listdir("./mytestdata/3screens"):
         if filename.endswith(".csv"):
             tf.compat.v1.reset_default_graph()
