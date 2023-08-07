@@ -217,7 +217,7 @@ def main():
             print('--------------',user,ratio,'----------')
             allindex = queryindex[filename.replace('.csv','')]
             splitindex = allindex[int(len(allindex)*ratio)]
-            pred_index = allindex[int(len(allindex)*ratio):]
+            pred_index = queryindex
             print(splitindex)
             print(pred_index)
             data = pd.read_csv('./mytestdata/3screens/'+filename)
