@@ -198,7 +198,7 @@ def check_restore_parameters(sess, saver):
 def main():
     suggestions = {}
     queryindex = {}
-    with open('./mytestdata/processed_suggest3screen.json', 'r') as f:
+    with open('./mytestdata/processed_suggestland_3screens.json', 'r') as f:
         suggest3screens = json.load(f)
     for user,__suggestions in suggest3screens.items():
         if user not in queryindex:
