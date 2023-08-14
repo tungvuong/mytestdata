@@ -212,6 +212,8 @@ def main():
             print(user)
             suggestions[user] = []
             ratio = 0.7
+            if user in ['C02FF90FDF8V']:
+                ratio = 0.6
             if user in ['D43D7EC3E0C2']:
                 ratio = 0.85
             print('--------------',user,ratio,'----------')
