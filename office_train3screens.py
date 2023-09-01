@@ -432,9 +432,8 @@ def main():
             trainer.fit(model, summary_data)
             pred_df = pd.read_csv('./mytestdata/office3screens/'+filename)[modified_splitindex:]
             print(modified_splitindex)
-            print(pred_index)
             for index, row in pred_df.iterrows():
-                if (index+2 not in pred_index):
+                if (row['index'] not in pred_index):
                     continue
                 print()
                 print(index+2)
