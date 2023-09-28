@@ -234,7 +234,7 @@ def main():
             
             in_size = out_size = len(vocab)
             lstm_size = 256  # 128
-            num_layers = 4
+            num_layers = 2
             batch_size = 128  # 128
             time_steps = 50  # 50
 
