@@ -233,9 +233,9 @@ def main():
             data, vocab = load_data('./mytestdata/lstm_data/land_'+user+'.txt')
             
             in_size = out_size = len(vocab)
-            lstm_size = 128  # 128
-            num_layers = 2
-            batch_size = 64  # 128
+            lstm_size = 256  # 128
+            num_layers = 4
+            batch_size = 128  # 128
             time_steps = 50  # 50
 
             NUM_TRAIN_BATCHES = 20000
