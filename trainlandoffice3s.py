@@ -305,8 +305,8 @@ def main():
         if filename.endswith(".csv"):
             torch.cuda.empty_cache()
             user = filename.replace('.csv','')
-#            if user in userindex.keys():
-#                continue
+            if user in userindex.keys():
+                continue
             suggestions[user] = []
             ratio = .7
             if user in ['D43D7EC3E0C2']:
