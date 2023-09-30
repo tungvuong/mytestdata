@@ -294,10 +294,10 @@ def generate_lyrics(seed_line, num_lines, model_, noise_percent = 0.25, multiple
 
 def main():
     torch.cuda.empty_cache()
-#    with open('./mytestdata/suggestland_office3screens.json', 'r') as f:
-#        userindex = json.load(f)
-#    suggestions = userindex
-#    print(userindex.keys())
+    with open('./mytestdata/suggestland_office3screens.json', 'r') as f:
+        userindex = json.load(f)
+    suggestions = userindex
+    print(userindex.keys())
     suggestions = {}
     with open('./mytestdata/landofficeindex.json') as json_file:
         queryindex = json.load(json_file)
