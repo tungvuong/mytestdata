@@ -298,7 +298,7 @@ def main():
         userindex = json.load(f)
     suggestions = userindex
     print(userindex.keys())
-    suggestions = {}
+#    suggestions = {}
     with open('./mytestdata/landofficeindex.json') as json_file:
         queryindex = json.load(json_file)
     for filename in os.listdir("./mytestdata/land_office3screens"):
